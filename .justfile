@@ -5,9 +5,9 @@ run *DAYS:
   #!/usr/bin/env bash
   set -euo pipefail
   if [[ "{{DAYS}}" == "" ]]; then \
-    cargo run --release; \
+    cargo run -q --release; \
   else \
-    for day in {{DAYS}}; do echo ""; cargo run --release --bin $day; done; \
+    for day in {{DAYS}}; do echo ""; cargo run -q --release --bin $day; done; \
   fi
 
 get DAY:

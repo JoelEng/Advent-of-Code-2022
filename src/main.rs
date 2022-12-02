@@ -1,5 +1,6 @@
 use once_cell::sync::Lazy;
 use regex::Regex;
+use std::path::Path;
 use std::process::Command;
 
 static MS_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"Time: (\d+)ms").unwrap());
@@ -14,6 +15,9 @@ fn main() {
     let mut days_completed = 0;
     for day_num in 1..=25 {
         let day = format!("{:0>2}", day_num);
+        if !Path::new(&format!("src/bin/{}.rs", day)).exists() {
+            continue; // skip if file doesn't exist
+        }
         let cmd = Command::new("cargo")
             .args(&["run", "--release", "--bin", &day])
             .output()

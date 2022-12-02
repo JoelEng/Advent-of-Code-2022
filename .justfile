@@ -1,6 +1,11 @@
 year := "2022"
 set dotenv-load := true
 
+post DAY PART:
+  #!/usr/bin/env bash
+  set -euo pipefail
+  cargo run -q --release --bin post {{DAY}} {{PART}}
+
 run *DAYS:
   #!/usr/bin/env bash
   set -euo pipefail

@@ -15,6 +15,7 @@ path = "src/post.rs"
 itertools = "0.10"
 hashbrown = "0.13"
 petgraph = "0.6"
+array_tool = "1.0"
 
 # main.rs dependencies
 regex = "1.7"

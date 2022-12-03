@@ -1,4 +1,3 @@
-year := "2022"
 set dotenv-load := true
 
 post DAY PART:
@@ -29,7 +28,7 @@ get DAY:
     exit 1; \
   fi
 
-  URL="https://adventofcode.com/{{year}}/day/$(("10#{{DAY}}" + 0))/input"
+  URL="https://adventofcode.com/$YEAR/day/$(("10#{{DAY}}" + 0))/input"
   mkdir -p inputs
   mkdir -p input_examples
   curl "$URL" --cookie "session=$AOC_SESSION" -s | tee "inputs/{{DAY}}.in"

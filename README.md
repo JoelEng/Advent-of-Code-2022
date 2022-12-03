@@ -4,6 +4,12 @@ My solutions for Advent of Code 2022.
 
 Project structure and setup kindly stolen from [AxlLind](https://github.com/AxlLind) and greatly expanded upon.
 
+## Setup
+
+Create a .env file containing two tokens: YEAR and AOC_SESSION.
+
+AOC_SESSION is your session cookie, acquired from the advent of code website.
+
 ## Usage
 
 ```sh
@@ -15,5 +21,3 @@ just get <DAY>          # fetch input and create .rs file from template
 
 just post <DAY> <PART>  # submit output for automatic checking.
 ```
-
-The token AOC_SESSION needs to be added to a .env file before use.

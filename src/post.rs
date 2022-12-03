@@ -1,6 +1,7 @@
 use dotenv::dotenv;
 use regex::Regex;
 use std::env;
+use std::path::Path;
 use std::process::{exit, Command};
 
 const TOO_FAST: &str = "(You gave an answer too recently.*to wait.)";
@@ -19,6 +20,17 @@ async fn main() {
     let day = &args[1];
     let part = &args[2];
     let year = env::var("YEAR").unwrap();
+
+    let day_num: i32 = day.parse().unwrap();
+    if day_num < 1 || day_num > 25 {
+        eprintln!("\x1b[41;30mIncorrect day. Should be between 1 and 25\x1b[0m");
+        exit(1);
+    }
+
+    if !Path::new(&format!("src/bin/{}.rs", day)).exists() {
+        eprintln!("\x1b[41;30mYou do not have a solution for this day\x1b[0m");
+        exit(1);
+    }
 
     let cmd = Command::new("cargo")
         .args(&["run", "--release", "--bin", &day])

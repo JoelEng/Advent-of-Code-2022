@@ -1,6 +1,7 @@
 # Eric Wastl wishes for users not to share their puzzle input
 /inputs/*
 /input_examples/*
+/answers/*
 
 # Private AOC_SESSION token
 .env

@@ -31,7 +31,9 @@ get DAY:
   URL="https://adventofcode.com/$YEAR/day/$(("10#{{DAY}}" + 0))/input"
   mkdir -p inputs
   mkdir -p input_examples
+  mkdir -p answers
   curl "$URL" --cookie "session=$AOC_SESSION" -s | tee "inputs/{{DAY}}.in"
-  touch 'input_examples/{{DAY}}.in'
+  touch "input_examples/{{DAY}}.in"
+  echo -e "part one: \npart two: " > "answers/{{DAY}}.sol"
   cp -n "src/template.rs" "src/bin/{{DAY}}.rs"
   sed -i "s/xx/{{DAY}}/g" "src/bin/{{DAY}}.rs"

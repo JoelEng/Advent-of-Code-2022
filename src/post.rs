@@ -1,6 +1,7 @@
 use dotenv::dotenv;
 use regex::Regex;
 use std::env;
+use std::fs;
 use std::path::Path;
 use std::process::{exit, Command};
 
@@ -52,6 +53,9 @@ async fn main() {
         }
     };
 
+    let ansi_escape = Regex::new(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])").unwrap();
+    let answer = ansi_escape.replace_all(&answer, "").to_string();
+
     let form = [("answer", &answer), ("level", part)];
     println!(
         "\x1b[4;1mPosting {} to day {} part {} ({})\x1b[0m\n",
@@ -78,6 +82,11 @@ async fn main() {
             "\x1b[102;30m{}\x1b[0m",
             corr_re.captures(&html).unwrap().get(1).unwrap().as_str()
         );
+        if part == "1" {
+            write_ans(&day, &answer, "one".to_string());
+        } else {
+            write_ans(&day, &answer, "two".to_string());
+        }
     }
 }
 
@@ -99,4 +108,17 @@ async fn post(year: String, short_day: String, form: [(&str, &String); 2]) -> St
         .unwrap();
 
     res.text().await.unwrap()
+}
+
+fn write_ans(day: &String, answer: &String, part_string: String) {
+    let ans_path = format!("answers/{}.sol", day);
+    let ans_file = fs::read_to_string(&ans_path).unwrap();
+    let re = Regex::new(&(format!("part {}: ", part_string).to_owned() + r"([^\n]*)")).unwrap();
+    let new_ans_file = re
+        .replace(&ans_file, format!("part {}: {}", part_string, answer))
+        .to_string();
+    let ansi_escape = Regex::new(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])").unwrap();
+    let new_ans_file = ansi_escape.replace_all(&new_ans_file, "").to_string();
+
+    fs::write(&ans_path, new_ans_file).unwrap();
 }

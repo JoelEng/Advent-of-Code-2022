@@ -8,7 +8,7 @@ Project structure and setup kindly stolen from [AxlLind](https://github.com/AxlL
 
 Create a .env file containing two tokens: YEAR and AOC_SESSION.
 
-AOC_SESSION is your session cookie, acquired from the advent of code website.
+AOC_SESSION is your session cookie, acquired from the advent of code website [like this](https://github.com/wimglenn/advent-of-code-wim/issues/1).
 
 ## Usage
 

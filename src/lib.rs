@@ -28,11 +28,14 @@ pub fn main(args: TokenStream, input: TokenStream) -> TokenStream {
       fn main() {
         let now = ::std::time::Instant::now();
         let (p1, p2) = aoc_solution(INPUT.trim_end());
-        let time = now.elapsed().as_millis();
+        let time = now.elapsed();
 
         let file = std::fs::read_to_string(format!("answers/{}.sol", #day)).unwrap();
         let ans1 = &regex::Regex::new(r"part one: ([^\n]*)").unwrap().captures_iter(&file).next().unwrap()[1];
         let ans2 = &regex::Regex::new(r"part two: ([^\n]*)").unwrap().captures_iter(&file).next().unwrap()[1];
+
+        println!("\x1b[4;1mDay {}:\x1b[0m", #day);
+
         print!("Part one: ");
         if ans1 != "" {
           if ans1 == p1.to_string() {
@@ -55,14 +58,20 @@ pub fn main(args: TokenStream, input: TokenStream) -> TokenStream {
         if #example {
           println!("\x1b[101mUSING EXAMPLE INPUT\x1b[0m");
         }
-        if time <= 100 {
+        if time.as_millis() <= 10 {
           print!("\x1b[102m"); // green
-        } else if time <= 1000 {
+        } else if time.as_millis() <= 1000 {
           print!("\x1b[103m"); // yellow
         } else {
           print!("\x1b[101m"); // red
         }
-        println!("\x1b[30mTime: {}ms\x1b[0m", time);
+        print!("\x1b[30m");
+        if time.as_millis() > 0 {
+          print!("Time: {}ms", time.as_millis());
+        } else {
+          print!("Time: {}μs", time.as_micros());
+        }
+        println!("\x1b[0m");
       }
     };
     TokenStream::from(tokens)

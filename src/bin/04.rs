@@ -1,23 +1,30 @@
-use scan_fmt::scan_fmt;
-
 #[aoc::main(04)]
 fn main(input: &str) -> (usize, usize) {
-    let pairs: Vec<(u32, u32, u32, u32)> = input
-        .lines()
-        .map(|l| scan_fmt!(l, "{}-{},{}-{}", u32, u32, u32, u32).unwrap())
-        .collect();
+    let pairs = get_pairs(input);
 
     let (mut p1, mut p2) = (0, 0);
-    for (e00, e01, e10, e11) in pairs {
-        if (e00 <= e10 && e01 >= e11) || (e10 <= e00 && e11 >= e01) {
+    for (a, b) in pairs {
+        if (a.0 <= b.0 && a.1 >= b.1) || (b.0 <= a.0 && b.1 >= a.1) {
             p1 += 1;
         }
-        for a in e00..=e01 {
-            if (e10..=e11).contains(&a) {
-                p2 += 1;
-                break;
-            }
+        if b.0 <= a.1 && a.0 <= b.1 {
+            p2 += 1;
         }
     }
     (p1, p2)
+}
+
+// This parsing is not as pretty as scan_fmt, but much much faster
+fn get_pairs(input: &str) -> Vec<((u32, u32), (u32, u32))> {
+    input
+        .lines()
+        .filter_map(|l| {
+            let (a, b) = l.split_once(",")?;
+            let ((a0, a1), (b0, b1)) = (a.split_once("-")?, b.split_once("-")?);
+            Some((
+                (a0.parse().ok()?, a1.parse().ok()?),
+                (b0.parse().ok()?, b1.parse().ok()?),
+            ))
+        })
+        .collect()
 }

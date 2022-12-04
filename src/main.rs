@@ -1,47 +1,48 @@
-use once_cell::sync::Lazy;
+use itertools::Itertools;
 use regex::Regex;
-use std::path::Path;
+use std::error::Error;
+use std::fs;
 use std::process::Command;
 
-static MS_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"Time: (\d+)ms").unwrap());
-
-fn extract_time(s: &str) -> Option<u32> {
-    let capture = MS_REGEX.captures_iter(s).next()?;
-    capture[1].parse().ok()
+fn extract_microseconds(output: &str) -> Result<usize, Box<dyn Error>> {
+    let out = output.lines().last().unwrap();
+    let ansi_escape = Regex::new(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])").unwrap();
+    let out = ansi_escape.replace_all(out, "").to_string();
+    let time = if out.ends_with("ms") {
+        out["Time: ".len()..out.len() - 2].parse::<usize>()? * 1000
+    } else {
+        out["Time: ".len()..out.len() - 3].parse::<usize>()?
+    };
+    Ok(time)
 }
 
-fn main() {
+fn main() -> Result<(), Box<dyn Error>> {
+    let days = fs::read_dir(concat!(env!("CARGO_MANIFEST_DIR"), "/src/bin/"))?
+        .filter_map(|p| p.ok()?.path().file_stem()?.to_str().map(str::to_string))
+        .sorted()
+        .collect::<Vec<_>>();
     let mut total_time = 0;
-    let mut days_completed = 0;
-    for day_num in 1..=25 {
-        let day = format!("{:0>2}", day_num);
-        if !Path::new(&format!("src/bin/{}.rs", day)).exists() {
-            continue; // skip if file doesn't exist
-        }
+    for day in &days {
         let cmd = Command::new("cargo")
-            .args(&["run", "--release", "--bin", &day])
-            .output()
-            .unwrap();
-        let output = String::from_utf8(cmd.stdout).unwrap();
-        match extract_time(&output) {
-            Some(x) => {
-                days_completed += 1;
-                total_time += x;
-            }
-            None => continue,
-        };
-        println!("\x1b[4;1mDay {}:\n\x1b[0m{}", day, output);
+            .args(&["run", "--release", "--bin", day])
+            .output()?;
+        let output = String::from_utf8(cmd.stdout)?;
+        println!("{}", output);
+        total_time += extract_microseconds(&output)?;
     }
     print!("\x1b[4;1m");
+    let days_completed = days.len();
     if days_completed == 25 {
         println!(
             "🎄 All days completed! 🎄 Total time: {}ms\x1b[0m",
-            total_time
+            total_time / 1000
         );
     } else {
         println!(
             "{} days completed in {}ms\x1b[0m",
-            days_completed, total_time
+            days_completed,
+            total_time / 1000
         );
     }
+    Ok(())
 }

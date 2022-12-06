@@ -1,65 +1,54 @@
-use hashbrown::HashMap;
 use itertools::Itertools;
+use std::str;
 
 #[aoc::main(05)]
 fn main(input: &str) -> (String, String) {
     let (stacks, moves) = input.split_once("\n\n").unwrap();
-    let stacks = get_stacks(stacks);
-    let moves = get_moves(moves);
-
-    (p1(stacks.clone(), &moves), p2(stacks.clone(), &moves))
+    let (stacks, moves) = (get_stacks(stacks), get_moves(moves));
+    (p1(stacks.clone(), &moves), p2(stacks, &moves))
 }
 
-fn p1(mut stacks: HashMap<usize, Vec<char>>, moves: &Vec<(usize, usize, usize)>) -> String {
+fn p1(mut stacks: Vec<Vec<char>>, moves: &Vec<(usize, usize, usize)>) -> String {
     for (mv, a, b) in moves {
         for _ in 0..*mv {
-            let pop = stacks.get_mut(a).unwrap().pop().unwrap();
-            stacks.get_mut(b).unwrap().push(pop);
+            let pop = stacks[a - 1].pop().unwrap();
+            stacks[b - 1].push(pop);
         }
     }
-
-    let mut p1 = String::from("            ");
-    for (i, s) in stacks {
-        p1.insert(i, *s.last().unwrap());
-    } // VCTFTJQCG, gives wrong answer
-    p1.replace(" ", "")
+    stacks_to_str(stacks)
 }
 
-fn p2(mut stacks: HashMap<usize, Vec<char>>, moves: &Vec<(usize, usize, usize)>) -> String {
+fn p2(mut stacks: Vec<Vec<char>>, moves: &Vec<(usize, usize, usize)>) -> String {
     for (mv, a, b) in moves {
         let mut temp: Vec<char> = vec![];
         for _ in 0..*mv {
-            let pop = stacks.get_mut(a).unwrap().pop().unwrap();
+            let pop = stacks[a - 1].pop().unwrap();
             temp.push(pop);
         }
         for _ in 0..*mv {
-            stacks.get_mut(b).unwrap().push(temp.pop().unwrap());
+            stacks[b - 1].push(temp.pop().unwrap());
         }
     }
-
-    let mut p2 = String::from("            ");
-    for (i, s) in stacks {
-        p2.insert(i, *s.last().unwrap());
-    } // GCFGLDNJZ, gives wrong answer
-    p2.replace(" ", "")
+    stacks_to_str(stacks)
 }
 
-fn get_stacks(stacks: &str) -> HashMap<usize, Vec<char>> {
+fn stacks_to_str(stacks: Vec<Vec<char>>) -> String {
+    stacks.iter().map(|v| v.last().unwrap()).collect()
+}
+
+fn get_stacks(stacks: &str) -> Vec<Vec<char>> {
     let stacks = stacks
         .replace("    ", "*")
         .replace(" ", "")
         .replace("[", "")
         .replace("]", "");
-    let mut s: HashMap<usize, Vec<char>> = HashMap::new();
-    let mut stacks = stacks.lines().rev();
-    for a in stacks.next().unwrap().chars().filter(|a| a.is_numeric()) {
-        s.insert(a.to_digit(10).unwrap() as usize, vec![]);
-    }
+    let mut s: Vec<Vec<char>> = vec![vec![]; 9];
+    let stacks = stacks.lines().rev();
     for l in stacks {
-        let mut i = 1;
+        let mut i = 0;
         for c in l.chars() {
             if c.is_alphabetic() {
-                s.get_mut(&i).unwrap().push(c);
+                s[i].push(c);
             }
             i += 1;
         }
@@ -73,7 +62,7 @@ fn get_moves(moves: &str) -> Vec<(usize, usize, usize)> {
         .map(|l| {
             l.split_whitespace()
                 .filter_map(|w| w.parse().ok())
-                .next_tuple()
+                .collect_tuple()
                 .unwrap()
         })
         .collect()

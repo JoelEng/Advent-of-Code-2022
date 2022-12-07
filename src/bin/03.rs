@@ -1,4 +1,3 @@
-use array_tool::vec::Intersect;
 use itertools::Itertools;
 
 #[aoc::main(03)]
@@ -11,8 +10,8 @@ fn p1(sacks: &Vec<&[u8]>) -> usize {
     let mut p1 = 0;
     for l in sacks {
         let (s1, s2) = l.split_at(l.len() / 2);
-        let i = s1.to_vec().intersect(s2.to_vec());
-        p1 += prio(i.get(0).unwrap());
+        let i = s1.iter().find(|a| s2.contains(a));
+        p1 += prio(i.unwrap());
     }
     p1
 }
@@ -20,8 +19,8 @@ fn p1(sacks: &Vec<&[u8]>) -> usize {
 fn p2(sacks: &Vec<&[u8]>) -> usize {
     let mut p2 = 0;
     for (s1, s2, s3) in sacks.iter().tuples() {
-        let i = s1.to_vec().intersect(s2.to_vec()).intersect(s3.to_vec());
-        p2 += prio(i.get(0).unwrap());
+        let i = s1.iter().find(|a| s2.contains(a) && s3.contains(a));
+        p2 += prio(i.unwrap());
     }
     p2
 }

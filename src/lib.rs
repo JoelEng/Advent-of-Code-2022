@@ -37,7 +37,7 @@ pub fn main(args: TokenStream, input: TokenStream) -> TokenStream {
         println!("\x1b[4;1mDay {}:\x1b[0m", #day);
 
         print!("Part one: ");
-        if ans1 != "" {
+        if ans1 != "" && !#example {
           if ans1 == p1.to_string() {
             print!("\x1b[32m");
           } else {
@@ -47,25 +47,26 @@ pub fn main(args: TokenStream, input: TokenStream) -> TokenStream {
         println!("{}\x1b[0m", p1);
 
         print!("Part two: ");
-        if ans2 != "" {
-          if ans2 != p2.to_string() {
-            print!("\x1b[31m");
-          } else {
+        if ans2 != "" && !#example {
+          if ans2 == p2.to_string() {
             print!("\x1b[32m");
+          } else {
+            print!("\x1b[31m");
           }
         }
         println!("{}\x1b[0m", p2);
         if #example {
           println!("\x1b[101mUSING EXAMPLE INPUT\x1b[0m");
-        }
-        if time.as_millis() <= 10 {
-          print!("\x1b[102m"); // green
-        } else if time.as_millis() <= 1000 {
-          print!("\x1b[103m"); // yellow
         } else {
-          print!("\x1b[101m"); // red
+          if time.as_millis() <= 10 {
+            print!("\x1b[102m"); // green
+          } else if time.as_millis() <= 1000 {
+            print!("\x1b[103m"); // yellow
+          } else {
+            print!("\x1b[101m"); // red
+          }
+          print!("\x1b[30m");
         }
-        print!("\x1b[30m");
         if time.as_millis() > 0 {
           print!("Time: {}ms", time.as_millis());
         } else {

@@ -33,7 +33,7 @@ fn p2(mut stacks: Vec<Vec<char>>, moves: &Vec<(usize, usize, usize)>) -> String 
 }
 
 fn stacks_to_str(stacks: Vec<Vec<char>>) -> String {
-    stacks.iter().map(|v| v.last().unwrap()).collect()
+    stacks.iter().map(|v| v.last().unwrap_or(&' ')).collect()
 }
 
 fn get_stacks(stacks: &str) -> Vec<Vec<char>> {

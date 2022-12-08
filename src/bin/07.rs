@@ -1,83 +1,43 @@
 use std::str;
 
 enum System {
-    File(String, u32),
-    Dir(String, Vec<System>),
+    File(u32),
+    Dir(Vec<System>),
 }
 
 #[aoc::main(07)]
 fn main(input: &str) -> (u32, u32) {
-    let mut cmds = input.split("$").skip(2);
-    let home = execute(&mut cmds);
-    // print_dir(&home, "  ");
-    let (p1_ans, size) = p1(&home);
-    let p2_ans = p2(size - 40000000, &home).0;
-    let v = p2_ans.iter().min().unwrap();
-    (p1_ans, v.to_owned())
+    let mut cmds = input.lines().skip(1);
+    let mut dirs = vec![];
+    solve(parse_tree(&mut cmds), &mut dirs);
+    let p1: u32 = dirs.iter().filter(|d| d < &&100000).sum();
+    let space_to_free = dirs.iter().max().unwrap() - 40000000;
+    let p2 = dirs.iter().filter(|d| d >= &&space_to_free).min().unwrap();
+    (p1, *p2)
 }
 
-fn p1(dir: &Vec<System>) -> (u32, u32) {
+fn solve(dir: Vec<System>, dirs: &mut Vec<u32>) -> u32 {
     let mut size = 0;
-    let mut tot = 0;
     for s in dir {
-        match s {
-            System::File(n, s) => size += s,
-            System::Dir(n, c) => {
-                let (t, s) = p1(c);
-                tot += t;
-                size += s;
-            }
+        size += match s {
+            System::File(s) => s,
+            System::Dir(c) => solve(c, dirs),
         }
     }
-    if size <= 100000 {
-        tot += size;
-    }
-    (tot, size)
+    dirs.push(size);
+    size
 }
 
-fn p2(space_to_free: u32, dir: &Vec<System>) -> (Vec<u32>, u32) {
-    let mut size = 0;
-    let mut big_dirs = vec![];
-    for s in dir {
-        match s {
-            System::File(n, s) => size += s,
-            System::Dir(n, c) => {
-                let (mut t, s) = p2(space_to_free, c);
-                big_dirs.append(&mut t);
-                size += s;
-            }
-        }
-    }
-    if size > space_to_free {
-        big_dirs.push(size);
-    }
-    (big_dirs, size)
-}
-
-fn execute<'a, T: Iterator<Item = &'a str>>(cmds: &mut T) -> Vec<System> {
-    let mut v: Vec<System> = vec![];
+fn parse_tree<'a, T: Iterator<Item = &'a str>>(cmds: &mut T) -> Vec<System> {
+    let mut v = vec![];
     while let Some(cmd) = cmds.next() {
-        let mut cmd = cmd.trim().lines();
-        let mut a = cmd.next().unwrap().split_whitespace();
-        let args_count = a.clone().count();
-        match args_count {
-            2 => {
-                let name = a.nth(1).unwrap();
-                if name == ".." {
-                    break;
-                }
-                v.push(System::Dir(name.to_string(), execute(cmds)));
+        match cmd.split_whitespace().collect::<Vec<_>>().as_slice() {
+            &[z, _] => {
+                z.parse().and_then(|z| Ok(v.push(System::File(z)))).ok();
             }
-            1 => {
-                for f in cmd {
-                    let (size, name) = f.split_once(" ").unwrap();
-                    if size.parse::<u32>().is_ok() {
-                        v.push(System::File(name.to_string(), size.parse().unwrap()));
-                    }
-                }
-            }
-            _ => unreachable!(),
-        };
+            &[_, _, ".."] => break,
+            _ => v.push(System::Dir(parse_tree(cmds))),
+        }
     }
     v
 }

@@ -11,7 +11,6 @@ fn main(input: &str) -> (i32, &str) {
             x += n;
         }
     }
-    println!("");
     let p1 = [20, 60, 100, 140, 180, 220]
         .into_iter()
         .map(|c| c * cycles[c as usize])
@@ -20,12 +19,12 @@ fn main(input: &str) -> (i32, &str) {
 }
 
 fn draw(x: i32, i: usize) {
-    if i % 40 == 0 {
-        println!("");
-    }
     if (x - i as i32 % 40).abs() <= 1 {
         print!("█");
     } else {
         print!(" ");
+    }
+    if (i + 1) % 40 == 0 {
+        println!("");
     }
 }

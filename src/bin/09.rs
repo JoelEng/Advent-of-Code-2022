@@ -4,22 +4,20 @@ type Pos = (i32, i32);
 
 #[aoc::main(09)]
 fn main(input: &str) -> (usize, usize) {
-    let motions: Vec<(char, i32)> = input
+    let motions = input
         .lines()
         .map(|l| l.split_once(" ").unwrap())
-        .map(|(d, v)| (d.chars().next().unwrap(), v.parse().unwrap()))
-        .collect();
-    let mut set: HashSet<Pos> = HashSet::new();
-    let mut long_set: HashSet<Pos> = HashSet::new();
+        .map(|(d, v)| (d.chars().next().unwrap(), v.parse().unwrap()));
+    let (mut p1, mut p2): (HashSet<Pos>, HashSet<Pos>) = (HashSet::new(), HashSet::new());
     let mut rope = [(0, 0); 10];
     for (d, v) in motions {
         for _ in 0..v {
             move_rope(&mut rope, d);
-            set.insert(rope[1]);
-            long_set.insert(rope[9]);
+            p1.insert(rope[1]);
+            p2.insert(rope[9]);
         }
     }
-    (set.len(), long_set.len())
+    (p1.len(), p2.len())
 }
 
 fn move_rope(rope: &mut [Pos], d: char) {

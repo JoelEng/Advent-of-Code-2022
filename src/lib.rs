@@ -26,6 +26,7 @@ pub fn main(args: TokenStream, input: TokenStream) -> TokenStream {
       const INPUT: &str = include_str!(#input_path);
       #aoc_solution
       fn main() {
+        println!("\x1b[4;1mDay {}:\x1b[0m", #day);
         let now = ::std::time::Instant::now();
         let (p1, p2) = aoc_solution(INPUT.trim_end());
         let time = now.elapsed();
@@ -34,7 +35,6 @@ pub fn main(args: TokenStream, input: TokenStream) -> TokenStream {
         let ans1 = &regex::Regex::new(r"part one: ([^\n]*)").unwrap().captures_iter(&file).next().unwrap()[1];
         let ans2 = &regex::Regex::new(r"part two: ([^\n]*)").unwrap().captures_iter(&file).next().unwrap()[1];
 
-        println!("\x1b[4;1mDay {}:\x1b[0m", #day);
 
         print!("Part one: ");
         if ans1 != "" && !#example {

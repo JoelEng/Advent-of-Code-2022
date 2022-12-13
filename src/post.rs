@@ -10,8 +10,7 @@ const INCORRECT: &str = r"(That's not the right answer)";
 const ALREADY_DONE: &str = r"(You don't seem to be solving.*\.)";
 const CORRECT: &str = "(That's the right answer!)";
 
-#[tokio::main]
-async fn main() {
+fn main() {
     dotenv().ok();
     let part_one: Regex = Regex::new(r"Part one: ([^\n]+)").unwrap();
     let part_two: Regex = Regex::new(r"Part two: ([^\n]+)").unwrap();
@@ -19,7 +18,6 @@ async fn main() {
 
     let args: Vec<String> = env::args().collect();
     let day = &args[1];
-    let part = &args[2];
     let year = env::var("YEAR").unwrap();
 
     let day_num: i32 = day.parse().unwrap();
@@ -33,6 +31,28 @@ async fn main() {
         exit(1);
     }
 
+    let file = std::fs::read_to_string(format!("answers/{}.sol", day)).unwrap();
+    let ans1 = &regex::Regex::new(r"part one: ([^\n]*)")
+        .unwrap()
+        .captures_iter(&file)
+        .next()
+        .unwrap()[1];
+    let ans2 = &regex::Regex::new(r"part two: ([^\n]*)")
+        .unwrap()
+        .captures_iter(&file)
+        .next()
+        .unwrap()[1];
+
+    let part = if ans1 == "" { 1 } else { 2 };
+
+    if part == 2 && ans2 != "" {
+        println!(
+            "⭐ \x1b[103;30mYou've already solved day {}!\x1b[0m ⭐",
+            day
+        );
+        return;
+    }
+
     let cmd = Command::new("cargo")
         .args(&["run", "--release", "--bin", &day])
         .output()
@@ -44,9 +64,9 @@ async fn main() {
         exit(1);
     }
 
-    let answer: String = match part.as_str() {
-        "1" => part_one.captures(&output).unwrap()[1].to_string(),
-        "2" => part_two.captures(&output).unwrap()[1].to_string(),
+    let answer: String = match part {
+        1 => part_one.captures(&output).unwrap()[1].to_string(),
+        2 => part_two.captures(&output).unwrap()[1].to_string(),
         _ => {
             eprintln!("\x1b[41;30mIncorrect puzzle part. Should be 1 or 2\x1b[0m");
             exit(1);
@@ -56,15 +76,13 @@ async fn main() {
     let ansi_escape = Regex::new(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])").unwrap();
     let answer = ansi_escape.replace_all(&answer, "").to_string();
 
-    let form = [("answer", &answer), ("level", part)];
     println!(
         "\x1b[4;1mPosting {} to day {} part {} ({})\x1b[0m\n",
         answer, day, part, year
     );
 
     let short_day = day.parse::<i32>().unwrap().to_string();
-
-    let html = post(year, short_day, form).await;
+    let html = post(year, short_day, &answer, part);
 
     for err in [TOO_FAST, INCORRECT, ALREADY_DONE] {
         let err_re = Regex::new(err).unwrap();
@@ -82,7 +100,7 @@ async fn main() {
             "\x1b[102;30m{}\x1b[0m",
             corr_re.captures(&html).unwrap().get(1).unwrap().as_str()
         );
-        if part == "1" {
+        if part == 1 {
             write_ans(&day, &answer, "one".to_string());
         } else {
             write_ans(&day, &answer, "two".to_string());
@@ -90,24 +108,19 @@ async fn main() {
     }
 }
 
-async fn post(year: String, short_day: String, form: [(&str, &String); 2]) -> String {
-    let client = reqwest::Client::new();
-    let res = client
-        .post(format!(
-            "https://adventofcode.com/{}/day/{}/answer",
-            year, short_day
-        ))
-        .form(&form)
-        .header(
-            "Cookie",
-            format!("session={}", env::var("AOC_SESSION").unwrap()),
-        )
-        .header("User-Agent", "Me")
-        .send()
-        .await
-        .unwrap();
-
-    res.text().await.unwrap()
+fn post(year: String, short_day: String, answer: &String, part: i32) -> String {
+    ureq::post(&format!(
+        "https://adventofcode.com/{}/day/{}/answer",
+        year, short_day
+    ))
+    .set(
+        "Cookie",
+        &format!("session={}", env::var("AOC_SESSION").unwrap()),
+    )
+    .send_form(&[("answer", answer), ("level", &part.to_string())])
+    .unwrap()
+    .into_string()
+    .unwrap()
 }
 
 fn write_ans(day: &String, answer: &String, part_string: String) {

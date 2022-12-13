@@ -1,9 +1,9 @@
 set dotenv-load := true
 
-post DAY PART:
+post DAY:
   #!/usr/bin/env bash
   set -euo pipefail
-  cargo run -q --release --bin post {{DAY}} {{PART}}
+  cargo run -q --release --bin post {{DAY}}
 
 run *DAYS:
   #!/usr/bin/env bash
@@ -14,7 +14,12 @@ run *DAYS:
     for day in {{DAYS}}; do echo ""; cargo run -q --release --bin $day; done; \
   fi
 
-get DAY:
+get *DAYS:
+  #!/usr/bin/env bash
+  set -euo pipefail
+  for day in {{DAYS}}; do just _get $day; done;
+
+_get DAY:
   #!/usr/bin/env bash
   set -euo pipefail
   

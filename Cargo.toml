@@ -13,8 +13,6 @@ path = "src/post.rs"
 
 [dependencies]
 hashbrown = "0.13"
-array_tool = "1.0"
-scan_fmt = "0.2"
 
 # main.rs dependencies
 regex = "1.7"
@@ -25,6 +23,5 @@ syn = { version = "1.0", features = ["full"] }
 quote = "1.0"
 
 # post.rs dependencies
-reqwest = "0.11"
-tokio = { version = "1.22", features = ["full"] }
 dotenv = "0.15"
+ureq = "2.5"

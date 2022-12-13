@@ -18,17 +18,14 @@ enum Op {
 
 #[aoc::main(11)]
 fn main(input: &str) -> (usize, usize) {
-    let mut monkeys: Vec<Monkey> = input.split("\n\n").filter_map(|s| make_monkey(s)).collect();
-    let modulo: u64 = monkeys.iter().map(|m| m.div).product();
-    (
-        biz(&mut monkeys.clone(), 20, |x| x / 3),
-        biz(&mut monkeys, 10000, |x| x % modulo),
-    )
+    let m: Vec<Monkey> = input.split("\n\n").filter_map(|s| make_monkey(s)).collect();
+    let modulo: u64 = m.iter().map(|m| m.div).product();
+    (biz(m.clone(), 20, |x| x / 3), biz(m, 10000, |x| x % modulo))
 }
 
-fn biz(monkeys: &mut Vec<Monkey>, rounds: usize, func: impl Fn(u64) -> u64) -> usize {
+fn biz(mut monkeys: Vec<Monkey>, rounds: usize, func: impl Fn(u64) -> u64) -> usize {
     for _ in 0..rounds {
-        round(monkeys, &func);
+        round(&mut monkeys, &func);
     }
     let sorted: Vec<usize> = monkeys.iter().map(|m| m.inspects).sorted().rev().collect();
     sorted[0] * sorted[1]

@@ -13,11 +13,13 @@ AOC_SESSION is your session cookie, acquired from the advent of code website [li
 ## Usage
 
 ```sh
-just run                # run all days
-just run <DAYS>         # run one or more specific days
+just run          # run all days
+just run <DAYS>   # run one or more specific days
+                  # <DAY> is always two characters, e.g. 01, 25 etc.
 
-just get <DAY>          # fetch input and create .rs file from template
-                        # input_examples/<DAY>.in has to be filled in manually
+just get <DAYS>   # fetch input and create .rs file from template
+                  # input_examples/<DAY>.in has to be filled in manually
 
-just post <DAY> <PART>  # submit output for automatic checking.
+just post <DAY>   # submit output for automatic checking.
+                  # submits part 2 if part 1 has already been submitted
 ```

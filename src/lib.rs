@@ -32,8 +32,8 @@ pub fn main(args: TokenStream, input: TokenStream) -> TokenStream {
         let time = now.elapsed();
 
         let file = std::fs::read_to_string(format!("answers/{}.sol", #day)).unwrap();
-        let ans1 = &regex::Regex::new(r"part one: ([^\n]*)").unwrap().captures_iter(&file).next().unwrap()[1];
-        let ans2 = &regex::Regex::new(r"part two: ([^\n]*)").unwrap().captures_iter(&file).next().unwrap()[1];
+        let ans1 = onig::Regex::new(r"part one: ([^\n]*)").unwrap().captures_iter(&file).next().unwrap().at(1).unwrap();
+        let ans2 = onig::Regex::new(r"part two: ([^\n]*)").unwrap().captures_iter(&file).next().unwrap().at(1).unwrap();
 
 
         print!("Part one: ");

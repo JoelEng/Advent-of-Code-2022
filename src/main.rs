@@ -1,5 +1,5 @@
 use itertools::Itertools;
-use regex::Regex;
+use onig::Regex;
 use std::error::Error;
 use std::fs;
 use std::process::Command;

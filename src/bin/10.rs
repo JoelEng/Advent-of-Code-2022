@@ -25,6 +25,6 @@ fn draw(x: i32, i: usize) {
         print!(" ");
     }
     if (i + 1) % 40 == 0 {
-        println!("");
+        println!();
     }
 }

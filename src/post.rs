@@ -1,5 +1,5 @@
 use dotenv::dotenv;
-use regex::Regex;
+use onig::Regex;
 use std::env;
 use std::fs;
 use std::path::Path;
@@ -32,16 +32,20 @@ fn main() {
     }
 
     let file = std::fs::read_to_string(format!("answers/{}.sol", day)).unwrap();
-    let ans1 = &regex::Regex::new(r"part one: ([^\n]*)")
+    let ans1 = onig::Regex::new(r"part one: ([^\n]*)")
         .unwrap()
         .captures_iter(&file)
         .next()
-        .unwrap()[1];
-    let ans2 = &regex::Regex::new(r"part two: ([^\n]*)")
+        .unwrap()
+        .at(1)
+        .unwrap();
+    let ans2 = onig::Regex::new(r"part two: ([^\n]*)")
         .unwrap()
         .captures_iter(&file)
         .next()
-        .unwrap()[1];
+        .unwrap()
+        .at(1)
+        .unwrap();
 
     let part = if ans1 == "" { 1 } else { 2 };
 
@@ -59,14 +63,24 @@ fn main() {
         .unwrap();
     let output = String::from_utf8(cmd.stdout).unwrap();
 
-    if example_input.is_match(&output) {
+    if example_input.find(&output).is_some() {
         eprintln!("\x1b[41;30mTried to submit with example input\x1b[0m");
         exit(1);
     }
 
     let answer: String = match part {
-        1 => part_one.captures(&output).unwrap()[1].to_string(),
-        2 => part_two.captures(&output).unwrap()[1].to_string(),
+        1 => part_one
+            .captures(&output)
+            .unwrap()
+            .at(1)
+            .unwrap()
+            .to_string(),
+        2 => part_two
+            .captures(&output)
+            .unwrap()
+            .at(1)
+            .unwrap()
+            .to_string(),
         _ => {
             eprintln!("\x1b[41;30mIncorrect puzzle part. Should be 1 or 2\x1b[0m");
             exit(1);
@@ -86,19 +100,19 @@ fn main() {
 
     for err in [TOO_FAST, INCORRECT, ALREADY_DONE] {
         let err_re = Regex::new(err).unwrap();
-        if err_re.is_match(&html) {
+        if err_re.find(&html).is_some() {
             eprintln!(
                 "\x1b[41;30m{}\x1b[0m",
-                err_re.captures(&html).unwrap().get(1).unwrap().as_str()
+                err_re.captures(&html).unwrap().at(1).unwrap()
             );
         }
     }
 
     let corr_re = Regex::new(CORRECT).unwrap();
-    if corr_re.is_match(&html) {
+    if corr_re.find(&html).is_some() {
         println!(
             "\x1b[102;30m{}\x1b[0m",
-            corr_re.captures(&html).unwrap().get(1).unwrap().as_str()
+            corr_re.captures(&html).unwrap().at(1).unwrap()
         );
         if part == 1 {
             write_ans(&day, &answer, "one".to_string());
@@ -128,7 +142,10 @@ fn write_ans(day: &String, answer: &String, part_string: String) {
     let ans_file = fs::read_to_string(&ans_path).unwrap();
     let re = Regex::new(&(format!("part {}: ", part_string).to_owned() + r"([^\n]*)")).unwrap();
     let new_ans_file = re
-        .replace(&ans_file, format!("part {}: {}", part_string, answer))
+        .replace(
+            &ans_file,
+            format!("part {}: {}", part_string, answer).as_str(),
+        )
         .to_string();
     let ansi_escape = Regex::new(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])").unwrap();
     let new_ans_file = ansi_escape.replace_all(&new_ans_file, "").to_string();

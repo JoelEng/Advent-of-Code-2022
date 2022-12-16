@@ -23,6 +23,15 @@ pub fn main(args: TokenStream, input: TokenStream) -> TokenStream {
     aoc_solution.sig.ident = Ident::new("aoc_solution", aoc_solution.sig.ident.span());
 
     let tokens = quote! {
+      /// Returns `actual` when using real problem input, and `example` when using example input
+      fn aox<T>(actual: T, example: T) -> T {
+        if #example {
+          example
+        } else {
+          actual
+        }
+      }
+
       const INPUT: &str = include_str!(#input_path);
       #aoc_solution
       fn main() {

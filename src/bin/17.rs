@@ -6,7 +6,7 @@ const ROCKS: usize = 1000000000000;
 #[aoc::main(17)]
 fn main(input: &str) -> (usize, usize) {
     let mut jets = input.chars().map(|c| if c == '>' { 1 } else { -1 }).cycle();
-    let rocks = [
+    let rocks: [Vec<(usize, usize)>; 5] = [
         vec![(0, 0), (1, 0), (2, 0), (3, 0)],
         vec![(1, 0), (0, 1), (1, 1), (2, 1), (1, 2)],
         vec![(0, 0), (1, 0), (2, 0), (2, 1), (2, 2)],
@@ -38,15 +38,6 @@ fn main(input: &str) -> (usize, usize) {
                 diff = i - prev_i;
             }
         }
-        let r = r
-            .iter()
-            .map(|(x, y)| {
-                (
-                    x + 2,
-                    (y + 4 + chamber.iter().map(|(_, y)| *y as isize).max().unwrap_or(-1)) as usize,
-                )
-            })
-            .collect();
         drop(r, &mut chamber, &mut jets);
         height = chamber.iter().map(|(_, y)| y).max().unwrap() + 1;
         if i == 2022 - 1 {
@@ -60,15 +51,6 @@ fn main(input: &str) -> (usize, usize) {
 
     for _ in 0..(ROCKS - 2022) % diff {
         let r = rocks.next().unwrap().1;
-        let r = r
-            .iter()
-            .map(|(x, y)| {
-                (
-                    x + 2,
-                    (y + 4 + chamber.iter().map(|(_, y)| *y as isize).max().unwrap_or(-1)) as usize,
-                )
-            })
-            .collect();
         drop(r, &mut chamber, &mut jets);
         height = chamber.iter().map(|(_, y)| y).max().unwrap() + 1;
     }
@@ -78,11 +60,20 @@ fn main(input: &str) -> (usize, usize) {
 }
 
 fn drop<T: Iterator<Item = isize>>(
-    rock: Vec<(usize, usize)>,
+    rock: &Vec<(usize, usize)>,
     chamber: &mut HashSet<(usize, usize)>,
     jets: &mut T,
 ) {
-    let mut rock = rock;
+    let mut rock: Vec<(usize, usize)> = rock
+        .clone()
+        .iter()
+        .map(|(x, y)| {
+            (
+                x + 2,
+                y + 4 + chamber.iter().map(|(_, y)| *y as isize).max().unwrap_or(-1) as usize,
+            )
+        })
+        .collect();
     loop {
         if let Some(r) = sideways(jets.next().unwrap(), &rock, chamber) {
             rock = r;

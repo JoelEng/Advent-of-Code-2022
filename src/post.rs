@@ -6,7 +6,7 @@ use std::path::Path;
 use std::process::{exit, Command};
 
 const TOO_FAST: &str = "(You gave an answer too recently.*to wait.)";
-const INCORRECT: &str = r"(That's not the right answer)";
+const INCORRECT: &str = r"(That's not the right answer[^\.]*.)";
 const ALREADY_DONE: &str = r"(You don't seem to be solving.*\.)";
 const CORRECT: &str = "(That's the right answer!)";
 

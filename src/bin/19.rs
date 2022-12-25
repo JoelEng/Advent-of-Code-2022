@@ -55,7 +55,6 @@ fn geodes(robots: Resources, resources: Resources, time: u32, b: Blueprint) -> u
     let max_clay = b.2 .1;
     let max_obs = b.3 .1;
     let prev_ore = resources[0] - robots[0];
-    let prev_clay = resources[1] - robots[1];
     if resources[0] >= b.0 && robots[0] <= max_ore && prev_ore < b.0 {
         let (mut rob, mut res) = (robots.clone(), new_resources.clone());
         rob[0] += 1;

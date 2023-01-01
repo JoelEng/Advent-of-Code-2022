@@ -1,3 +1,61 @@
+use hashbrown::HashMap;
+use itertools::Itertools;
+
+// Because I had a hard time solving this one, the solution is largely inspired by AxlLind
+#[aoc::main(16)]
+fn main(input: &str) -> (i32, i32) {
+    let input = input.replace(&['=', ';', ','][..], " ");
+    let valves: Vec<(&str, i32, Vec<&str>)> = input
+        .lines()
+        .map(|l| {
+            let mut v = l
+                .split_whitespace()
+                .filter(|w| w.chars().all(|c| c.is_uppercase()));
+            let n = l.split_whitespace().find_map(|w| w.parse().ok()).unwrap();
+            (v.next().unwrap(), n, v.collect())
+        })
+        .sorted_by_key(|v| v.1 * -1)
+        .collect();
+    let labels: HashMap<&str, usize> = valves.iter().enumerate().map(|(i, v)| (v.0, i)).collect();
+    let flow: Vec<i32> = valves.iter().map(|v| v.1).collect();
+    let adj: Vec<Vec<usize>> = valves
+        .iter()
+        .map(|v| v.2.iter().map(|t| labels[t]).collect())
+        .collect();
+    let m = valves.iter().position(|v| v.1 == 0).unwrap();
+    let mm = 1 << m;
+
+    // opt[time][node][unopened valves]
+    let mut opt = vec![vec![vec![0; mm]; valves.len()]; 30];
+    for t in 1..30 {
+        for i in 0..valves.len() {
+            let ii = 1 << i;
+            for x in 0..mm {
+                let mut tmp = opt[t][i][x];
+                if ii & x != 0 && t >= 2 {
+                    tmp = tmp.max(opt[t - 1][i][x - ii] + flow[i] * t as i32);
+                }
+                opt[t][i][x] = tmp.max(adj[i].iter().map(|j| opt[t - 1][*j][x]).max().unwrap());
+            }
+        }
+    }
+
+    let start = labels["AA"];
+    let p1 = opt[29][start][mm - 1];
+    let p2 = (0..mm / 2)
+        .map(|x| opt[25][start][x] + opt[25][start][mm - 1 - x])
+        .max()
+        .unwrap();
+    (p1, p2)
+}
+
+/*
+DISCLAIMER
+The following is my old solution, which works for p1 on the actual problem,
+but not on the example input. The new solution above does NOT work on my actual p1.
+WHAT EVEN IS THIS DAY???
+
+
 use bit_set::BitSet;
 use hashbrown::HashMap;
 use memoize::memoize;
@@ -101,3 +159,5 @@ fn to_usize(s: &str) -> usize {
     let b = s.next().unwrap() as usize - 64;
     a * 100 + b
 }
+
+*/
